@@ -51,7 +51,7 @@ let game = {
             let df = game.staticData.characters[index].df;
 
             let returnValue = BigNumber(game.staticData.characters[index].cost).dividedBy('100');
-            returnValue = returnValue.multipliedBy(BigNumber('0.8').exponentiatedBy(df));
+            returnValue = returnValue.multipliedBy(BigNumber('0.85').exponentiatedBy(df));
             // Self and global multipliers
             returnValue = returnValue.multipliedBy(game.userData.characterData.upgrades.globalMultiplier);
             returnValue = returnValue.multipliedBy(char.multiplier).integerValue(1);
