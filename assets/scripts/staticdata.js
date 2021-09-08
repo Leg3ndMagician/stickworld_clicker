@@ -290,7 +290,7 @@ var gamestaticdata = {
             "id": 20,
             "name": "Magic Stickbot v3",
             "cost": "2.8e22",
-            "df": 19,
+            "df": 20,
             "description": "A stickbot much more powerful from the previous. Your magicians decide to do some investigating to find the creator.",
             "icon": "ms_3.png",
             "upgrades": [
