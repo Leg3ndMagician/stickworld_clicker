@@ -204,13 +204,13 @@ let display = {
                         text = "Increases the effectiveness of <b>$NAME$</b> by <b>$AMOUNT$</b>%."
                         break;
                     case "globalBoost":
-                        text = "Increases the effectiveness of all characters by <b>$AMOUNT$%</b>."
+                        text = "Increases the effectiveness of all characters by <b>$AMOUNT$</b>%."
                         break;
                     case "clickBoost":
-                        text = "Increases your CPC by <b>$AMOUNT$%</b> of your CPS."
+                        text = "Increases your CPC by <b>$AMOUNT$</b>% of your CPS."
                         break;
                     default:
-                        text = "Unknown upgrade bonus!"
+                        text = "Unknown upgrade bonus! Grants +$AMOUNT$ of whatever."
                         break;
                 }
 
@@ -421,14 +421,23 @@ let save = {
         if (save.save.isBeta != BETA_STATUS) {
             display.popup.display("The save could not be imported", "OK", "CLOSE");
         } else {
-            game.userData = { ...game.userData, ...save.save }
+
+            let sd = save.save
 
             // set BigNumbers
-            game.userData.coins.amount = BigNumber(game.userData.coins.amount);
-            game.userData.characterData.upgrades.clickPercent = BigNumber(game.userData.characterData.upgrades.clickPercent);
-            game.userData.characterData.upgrades.globalMultiplier = BigNumber(game.userData.characterData.upgrades.globalMultiplier);
+            if (typeof sd.coins.amount != "undefined") game.userData.coins.amount = BigNumber(sd.coins.amount);
 
-            for (i = 0; i < game.staticData.characters.length; i++) { game.userData.characters[i].multiplier = BigNumber(game.userData.characters[i].multiplier) }
+            // characterData
+            if (typeof sd.characterData.upgrades.globalMultiplier != "undefined") game.userData.characterData.upgrades.globalMultiplier = BigNumber(sd.characterData.upgrades.globalMultiplier);
+            if (typeof sd.characterData.upgrades.clickPercent != "undefined") game.userData.characterData.upgrades.clickPercent = BigNumber(sd.characterData.upgrades.clickPercent);
+
+            // characters
+            for (i = 0; i < sd.characters.length; i++) {
+                if (typeof sd.characters[i].id != "undefined") game.userData.characters[i].id = sd.characters[i].id;
+                if (typeof sd.characters[i].level != "undefined") game.userData.characters[i].level = sd.characters[i].level;
+                if (typeof sd.characters[i].multiplier != "undefined") game.userData.characters[i].multiplier = BigNumber(sd.characters[i].multiplier);
+                if (typeof sd.characters[i].upgrades != "undefined") game.userData.characters[i].upgrades = sd.characters[i].upgrades;
+            }
 
             display.update.all();
         }

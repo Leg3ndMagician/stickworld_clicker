@@ -285,6 +285,65 @@ var gamestaticdata = {
                 { order: 3, icon: "placeholder_3.png", level: 50, name: "Magic Level 7", type: "selfBoost", amount: "200", flavor: "Twice as strong as magic level six." },
                 { order: 5, icon: "placeholder_4.png", level: 100, name: "Myth Energy Magician", type: "selfBoost", amount: "250", flavor: "\"The final upgrade.\"" }
             ]
+        },
+        {
+            "id": 20,
+            "name": "Magic Stickbot v3",
+            "cost": "2.8e22",
+            "df": 19,
+            "description": "A stickbot much more powerful from the previous. Your magicians decide to do some investigating to find the creator.",
+            "icon": "ms_3.png",
+            "upgrades": [
+                { order: 1, icon: "placeholder_1.png", level: 10, name: "Hyper Engine", type: "selfBoost", amount: "100", flavor: "Allows the stickbot to mimic the speed of the Myth Magician." },
+                { order: 2, icon: "placeholder_2.png", level: 25, name: "Reinforced Material", type: "selfBoost", amount: "150", flavor: "The enemies you are facing are becoming strong enough to dent the armor of the stickbot, so you purchase some stronger material." },
+                { order: 3, icon: "placeholder_3.png", level: 50, name: "Emergency Mode", type: "selfBoost", amount: "300", flavor: "As the stickbot becomes weak with battle damage, the lights on it suddenly turn red and it proceeds to annihilate its opponent." },
+                { order: 4, icon: "placeholder_4.png", level: 75, name: "Mouse Engine", type: "clickBoost", amount: "1", flavor: "You build an machine to replicate the powers of the hyper engine and hook it up to your mouse, making it hugely effective." }
+            ]
+        },
+        {
+            "id": 21,
+            "name": "Fire Magician",
+            "cost": "2.5e25",
+            "df": 22,
+            "description": "A scorching magician with a scorching temper, this magician will bestow a sunburn upon anyone who stands next to him for too long.",
+            "icon": "fire.png",
+            "upgrades": [
+                { order: 1, icon: "placeholder_1.png", level: 10, name: "Sunbeam", type: "selfBoost", amount: "100", flavor: "A warm sunbeam never fails to brighten the day. A hot sunbeam can really ruin your enemy's day." },
+                { order: 2, icon: "placeholder_2.png", level: 25, name: "Fireball", type: "selfBoost", amount: "150", flavor: "The fire magician becomes a blurred ball of flame, speeding across the sky." },
+                { order: 3, icon: "placeholder_3.png", level: 50, name: "Huge Health", type: "selfBoost", amount: "200", flavor: "With his rising power and magic level, the fire magician has so much health that it's difficult to damage him very much." },
+                { order: 5, icon: "placeholder_4.png", level: 100, name: "Raging Inferno", type: "selfBoost", amount: "250", flavor: "Fires rage across the land as the fire magician incinerates any enemy who dares stand in his way." },
+                { order: 6, icon: "placeholder_5.png", level: 125, name: "Scorching Presence", type: "globalBoost", amount: "50", flavor: "\"Why hello there, today's your unlucky day.\"" }
+            ]
+        },
+        {
+            "id": 22,
+            "name": "Ice Magician",
+            "cost": "2.2e28",
+            "df": 24,
+            "description": "The coolest magician around.",
+            "icon": "ice.png",
+            "upgrades": [
+                { order: 1, icon: "placeholder_1.png", level: 10, name: "Chilly", type: "selfBoost", amount: "100", flavor: "Decreases the temperature of the world by 1%." },
+                { order: 2, icon: "placeholder_2.png", level: 25, name: "Vortex", type: "selfBoost", amount: "150", flavor: "The ice magician harnesses the power of the polar vortex to improve his magic." },
+                { order: 3, icon: "placeholder_3.png", level: 50, name: "Frozen Magic", type: "selfBoost", amount: "200", flavor: "Your other stickmen's weapons have been around the ice magician for so long that they've frozen solid. Really stuns enemies, too." },
+                { order: 5, icon: "placeholder_4.png", level: 100, name: "Permafrost", type: "selfBoost", amount: "250", flavor: "The Ice Magician uses his power to freeze enemies solid." },
+                { order: 6, icon: "placeholder_5.png", level: 125, name: "Cooling Aura", type: "globalBoost", amount: "50", flavor: "\"There now,\" he says. \"Let's calm down, all right? We have some enemies to kill.\"" }
+            ]
+        },
+        {
+            "id": 23,
+            "name": "Time Magician",
+            "cost": "2.0e31",
+            "df": 26,
+            "description": "He was once late to a doctor's appointment and had to wait in line for half an hour. Since then, he has vowed to master time magic to ensure that never happens again.",
+            "icon": "time.png",
+            "upgrades": [
+                { order: 1, icon: "placeholder_1.png", level: 10, name: "Ultimate Speed", type: "selfBoost", amount: "100", flavor: "He's so powerful that time seems to slow down around him, allowing him to move with slightly frightening speed." },
+                { order: 2, icon: "placeholder_2.png", level: 25, name: "Time Magic", type: "selfBoost", amount: "150", flavor: "The Time Magician slows down time for enemies, allowing them to be easily hit." },
+                { order: 3, icon: "placeholder_3.png", level: 50, name: "Strategic Training", type: "selfBoost", amount: "200", flavor: "In order to outwit his enemies, the Time Magician trains against your own characters, allowing him to be more strategic." },
+                { order: 5, icon: "placeholder_4.png", level: 100, name: "Time Stop", type: "selfBoost", amount: "250", flavor: "The Time Magician has gained the power to stop time for your enemies, making them pitifully easy to dispatch." },
+                { order: 6, icon: "placeholder_5.png", level: 125, name: "For All Time", type: "globalBoost", amount: "50", flavor: "Always." }
+            ]
         }
     ]
 }
