@@ -67,7 +67,7 @@
       // EDITABLE
       // The limit on the value of DECIMAL_PLACES, TO_EXP_NEG, TO_EXP_POS, MIN_EXP, MAX_EXP, and
       // the arguments to toExponential, toFixed, toFormat, and toPrecision.
-      MAX = 1E9;                                   // 0 to MAX_INT32
+      MAX = 20;                                   // 0 to MAX_INT32
   
   
     /*

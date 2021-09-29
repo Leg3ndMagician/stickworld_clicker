@@ -7,37 +7,103 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Cliff Clicker 0.00</title>
+    <title>The Cliff Clicker 0.01</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div id="mainCol">
         <div class="centered">
-            <h1><span id="coinDisplay"></span> Soul Coins</h1>
-            <p>Soul Coins Per Second: <span id="cpsDisplay"></span></p>
-            <p>Soul Coins Per Click: <span id="cpcDisplay"></span></p>
+            <h1><span id="coinDisplay"></span>
+                <coin></coin> coins
+            </h1>
+            <p>Damage Per Second: <span id="dpsDisplay"></span></p>
+            <p>Damage Per Click: <span id="dpcDisplay"></span></p>
 
-            <image class="bigCoin" onclick="events.onButtonClick()" height=256px width=256px
-                src="assets/images/soul_coin.png"></image>
+            <div id="zoneInfo">
+                <h3 id="zoneLevel">Level 9001</h3>
+                <p id="zoneEnemies">69/420 enemies beaten</p>
+                <p>
+                    <button id="prevZone" onclick="events.changeLevel('PREVIOUS')">&#8592;</button>
+                    <button id="nextZone" onclick="events.changeLevel('NEXT')">&#8594;</button>
+                </p>
+            </div>
 
-            <p><button onclick="document.getElementById('fileUpload').click()">Load Game from TXT File</button>
-                <input type='file' accept=".txt" id="fileUpload" style="display:none">
-            <p><button onclick="save.saveGame()">Save Game to TXT File</button></p>
-
-            <p class="redText"><b>Warning: Beta</b><br>Saves from this version will not be
-                supported in the next version. If you plan to grind this game out, this is not a good version to put a
-                large amount of time into, as things will change a lot in the next version.<br><br>As this is the first version, I apologize for any bugs and will try to get them fixed!</p>
+            <div id="enemyContainer">
+                <image id="enemyBackground" onclick="events.onButtonClick()" height=256px width=256px
+                    src="assets/images/pedestal.png"></image>
+                <image id="enemy" onclick="events.onButtonClick()" height=256px width=256px></image>
+            </div>
+            <div id="enemyText">
+                <p id="enemyInfo">The One</p>
+                <div id="healthAnchor">
+                    <div id="healthBar"></div>
+                </div>
+                <p id="healthAmount">666,666,666 Health</p>
+            </div>
         </div>
     </div>
 
     <div class="tabs">
         <input checked=true type="radio" id="upgradeTabButton" name="tabs">
-        <label id="upgradeTabLabel" for="upgradeTabButton"><img class="tabImage" height=64px width=64px
+        <label class="tabSelect" id="upgradeTabLabel" for="upgradeTabButton"><img class="tabImage" height=64px width=64px
                 src="assets/images/characters/swordsman.png"></label>
         <div class="tab" id="upgradeTab">
             <div id="characters"></div>
         </div>
+
+        <input type="radio" id="animatorTabButton" name="tabs">
+        <label class="tabSelect" id="animatorTabLabel" for="animatorTabButton"><img class="tabImage" height=64px width=64px
+                src="assets/images/animators/placeholder.png"></label>
+        <div class="tab" id="animatorTab">
+            <h1 id="soulCoinAnchor" class="framed" style="padding: 10px;"><span id="soulCoinDisplay"></span>
+                <scoin></scoin> soul coins (+<span id="soulCoinDisplayPercent">1</span>% DPS)
+            </h1>
+            <div style="text-align:center;">
+            <h2><b>Prestige for +<span id="pendingSoulCoinDisplay"></span></b></h2>
+            <button onclick="events.prestige.confirm()" class="wideButton">PRESTIGE</button>
+            </div>
+            <div id="animators"></div>
+        </div>
+
+        <input type="radio" id="optionsTabButton" name="tabs">
+        <label class="tabSelect" id="optionsTabLabel" for="optionsTabButton"><img class="tabImage" height=64px width=64px
+                src="assets/images/tabs/settings.png"></label>
+        <div class="tab" id="optionsTab">
+            <h1>Options</h1>
+            <!--Settings-->
+            <h3>Settings</h3>
+            <label style="top:3px;" class="switch">
+                <input id="scientificNotation" type="checkbox" onchange="game.toggleSetting('scientificNotation')">
+                <span class="slider"></span>
+            </label>
+            <label for="scientificNotation">Use scientific notation</label>
+            <br>
+            <label style="top:3px;" class="switch">
+                <input id="hideAllTooltips" type="checkbox" onchange="game.toggleSetting('hideAllTooltips')">
+                <span class="slider"></span>
+            </label>
+            <label for="hideAllTooltips">Hide all tooltips</label>
+            <br>
+            <label style="top:3px;" class="switch">
+                <input id="autoZone" type="checkbox" onchange="game.toggleSetting('autoZone')">
+                <span class="slider"></span>
+            </label>
+            <label for="autoZone">Auto zone progression</label>
+            <br>
+            <!--Saving and Loading The Game-->
+            <h3>Saving and Loading</h3>
+            <p><button class="wideButton" onclick="document.getElementById('fileUpload').click()">Load from TXT
+                    file</button>
+                <input type='file' accept=".txt" id="fileUpload" style="display:none">
+            <p><button class="wideButton" onclick="save.saveGame()">Save as a TXT file</button></p>
+            <h3>Animators</h3>
+            <p>These are the animators who help give you bonuses! Make sure to give them soul coins, and hopefully subscribers!</p>
+            <a href="https://www.youtube.com/c/Leg3ndMagician" target="_blank">Leg3nd Magician<br></a>
+            <a href="https://www.youtube.com/c/AnimatorGamers" target="_blank">Animator Gamers<br></a>
+            <a href="https://www.youtube.com/channel/UCmKDwD8da6vqBgGZcNFVrgw" target="_blank">Tribot Animations<br></a>
+        </div>
+    </div>
     </div>
 
     <div id="tooltip_anchor">
@@ -56,6 +122,7 @@
     </div>
 
     <script src='assets/scripts/bignumber.js'></script>
+    <script src='assets/scripts/base64.js'></script>
     <script src='assets/scripts/staticdata.js'></script>
     <script src='assets/scripts/game.js'></script>
 </body>
