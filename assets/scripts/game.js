@@ -1,4 +1,6 @@
 /*
+version 0.01
+
 Hello and welcome to the cursed wasteland of game.js
 Most of this is probably really unorganized.
 
@@ -11,6 +13,7 @@ Purpmogus - Pretty much everything else
 */
 
 let BETA_STATUS = false;
+let SAVE_VERSION = 3;
 let BIGNUMBER_STATS = ["dps", "dpc", "coins", "totalCoins", "soulCoins", "pendingSoulCoins", "totalSoulCoins", "soulCoinsSpent", "globalDamageMultiplier", "globalCoinMultiplier", "globalClickPercent"];
 let SETTINGS = ["scientificNotation", "hideAllTooltips", "autoZone"];
 
@@ -928,7 +931,7 @@ let save = {
 
     saveGame: function () {
         this.save = game.userData
-        this.save.version = 3
+        this.save.version = SAVE_VERSION;
         this.save.timestamp = Date.now();
 
         // IS BETA?
@@ -976,7 +979,7 @@ let save = {
                 if (typeof sd.characters[i].id != "undefined") game.userData.characters[i].id = sd.characters[i].id;
                 if (typeof sd.characters[i].level != "undefined") game.userData.characters[i].level = sd.characters[i].level;
                 if (typeof sd.characters[i].multiplier != "undefined") game.userData.characters[i].multiplier = BigNumber(sd.characters[i].multiplier);
-                if (typeof sd.characters[i].levelMultiplier != "undefined") game.userData.characters[i].multiplier = BigNumber(sd.characters[i].multiplier);
+                if (typeof sd.characters[i].levelMultiplier != "undefined") game.userData.characters[i].levelMultiplier = BigNumber(sd.characters[i].levelMultiplier);
                 if (typeof sd.characters[i].upgrades != "undefined") {
                     for (u = 0; u < game.staticData.characters[i].upgrades.length; u++) {
                         if (typeof sd.characters[i].upgrades[u].unlocked != "undefined") game.userData.characters[i].upgrades[u].unlocked = sd.characters[i].upgrades[u].unlocked;
