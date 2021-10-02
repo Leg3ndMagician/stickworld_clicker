@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Cliff Clicker 0.01</title>
+    <title>The Cliff Clicker 0.02</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -91,12 +91,20 @@
             </label>
             <label for="autoZone">Auto zone progression</label>
             <br>
+            <label style="top:3px;" class="switch">
+                <input id="autoSaveGame" type="checkbox" onchange="game.toggleSetting('autoSaveGame')">
+                <span class="slider"></span>
+            </label>
+            <label for="autoZone">Automatically save to HTML5 local storage</label>
+            <br>
             <!--Saving and Loading The Game-->
             <h3>Saving and Loading</h3>
             <p><button class="wideButton" onclick="document.getElementById('fileUpload').click()">Load from TXT
                     file</button>
                 <input type='file' accept=".txt" id="fileUpload" style="display:none">
-            <p><button class="wideButton" onclick="save.saveGame()">Save as a TXT file</button></p>
+            <p><button class="wideButton" onclick="save.manualSaveGame(save.getSave())">Save as a TXT file</button></p>
+            <p><button class="wideButton" onclick="save.autoSaveGame(save.getSave())">Save to HTML5 local storage</button></p>
+            <p><button class="wideButton" onclick="display.popup.display('Are you sure you want to wipe your save? Press WIPE to confirm deletion and reload the page with a new save.', 'WIPE', 'save.wipeAutoSave()')">Wipe save from HTML5 storage</button></p>
             <h3>Animators</h3>
             <p>These are the animators who help give you bonuses! Make sure to give them soul coins, and hopefully subscribers!</p>
             <a href="https://www.youtube.com/c/Leg3ndMagician" target="_blank">Leg3nd Magician<br></a>

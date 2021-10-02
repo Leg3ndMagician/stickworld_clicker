@@ -120,7 +120,7 @@
         // The maximum exponent value, above which overflow to Infinity occurs.
         // Number type:  308  (1.7976931348623157e+308)
         // For MAX_EXP > 1e7, e.g. new BigNumber('1e100000000').plus(1) may be slow.
-        MAX_EXP = 1e7,                           // 1 to MAX
+        MAX_EXP = Number.MAX_SAFE_INTEGER,                           // 1 to MAX
   
         // Whether to use cryptographically-secure random number generation, if available.
         CRYPTO = false,                          // true or false

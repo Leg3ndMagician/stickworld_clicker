@@ -1,5 +1,5 @@
 /*
-version 0.01
+version 0.02
 
 Hello and welcome to the cursed wasteland of game.js
 Most of this is probably really unorganized.
@@ -13,9 +13,18 @@ Purpmogus - Pretty much everything else
 */
 
 let BETA_STATUS = false;
-let SAVE_VERSION = 3;
+let SAVE_VERSION = 4;
 let BIGNUMBER_STATS = ["dps", "dpc", "coins", "totalCoins", "soulCoins", "pendingSoulCoins", "totalSoulCoins", "soulCoinsSpent", "globalDamageMultiplier", "globalCoinMultiplier", "globalClickPercent"];
-let SETTINGS = ["scientificNotation", "hideAllTooltips", "autoZone"];
+let SETTINGS = ["scientificNotation", "hideAllTooltips", "autoZone", "autoSaveGame"];
+
+let levelBuyAmount = 1;
+let levelBuyFactors = {
+    1: '1',
+    10: '15.208',
+    25: '73.076',
+    100: '19809.773',
+    9999: '1.620247e315'
+}
 
 let game = {
     userData: {
@@ -48,7 +57,8 @@ let game = {
         settings: {
             scientificNotation: false,
             hideAllTooltips: false,
-            autoZone: false
+            autoZone: false,
+            autoSaveGame: false
         },
         characters: [],
         animators: []
@@ -65,10 +75,12 @@ let game = {
     },
 
     getValue: {
-        characterLevelUpCost: function (index) {
+        characterLevelUpCost: function (index, amount) {
             let level = game.userData.characters[index].level;
             let returnValue = BigNumber(game.staticData.characters[index].cost);
             returnValue = returnValue.multipliedBy(BigNumber('1.075').exponentiatedBy(level));
+            returnValue = returnValue.multipliedBy(levelBuyFactors[amount])
+            returnValue = returnValue.integerValue(0);
 
             return returnValue;
         },
@@ -78,7 +90,7 @@ let game = {
             return BigNumber(game.staticData.characters[index].cost).multipliedBy(orders[order]);
         },
 
-        character25Multiplier: function(index) {
+        character25Multiplier: function (index) {
             return game.staticData.characters[index].multiplier25;
         },
 
@@ -121,7 +133,7 @@ let game = {
             }
 
             let returnValue = BigNumber(game.staticData.characters[index].cost).dividedBy('10');
-            returnValue = returnValue.multipliedBy(BigNumber('0.77').exponentiatedBy(df));
+            returnValue = returnValue.multipliedBy(BigNumber('0.75').exponentiatedBy(df));
             // Self and global multipliers
             returnValue = returnValue.multipliedBy(game.userData.stats.globalDamageMultiplier);
             returnValue = returnValue.multipliedBy(char.multiplier).integerValue(1);
@@ -147,29 +159,38 @@ let game = {
             return returnValue;
         },
 
-        animatorLevelUpCost: function (index) {
+        animatorLevelUpCost: function (index, amountOfLevels) {
             let formula = game.staticData.animators[index].costFormula
             let level = game.userData.animators[index].level
             let levelPlusOne = level + 1;
+            let levelAfterUpgrading = level + amountOfLevels;
 
+            let prevCost = BigNumber('0')
             let cost = BigNumber('0');
 
             switch (formula) {
                 case "linear1":
-                    cost = BigNumber(levelPlusOne);
+                    prevCost = BigNumber(level).multipliedBy(level + 1).dividedBy(2);
+                    cost = BigNumber(levelAfterUpgrading).multipliedBy(levelAfterUpgrading + 1).dividedBy(2);
                     break;
                 case "exponential":
-                    cost = BigNumber('2').exponentiatedBy(levelPlusOne);
+                    prevCost = BigNumber(2).exponentiatedBy(levelPlusOne).minus(1);
+                    cost = BigNumber(2).exponentiatedBy(levelAfterUpgrading + 1).minus(1);
                     break;
                 case "leg3ndMagician":
-                    cost = BigNumber('100').multipliedBy(BigNumber(levelPlusOne).multipliedBy(levelPlusOne + 1).dividedBy('2'))
+                    prevCost = BigNumber(100).multipliedBy(BigNumber(level).multipliedBy(levelPlusOne).multipliedBy(levelPlusOne + 1).dividedBy(6));
+                    cost = BigNumber(100).multipliedBy(BigNumber(levelAfterUpgrading).multipliedBy(levelAfterUpgrading + 1).multipliedBy(levelAfterUpgrading + 2).dividedBy(6));
             }
 
-            return cost;
+            return cost.minus(prevCost);
         },
 
         isAnimatorMaxed: function (index) {
             return game.userData.animators[index].level >= game.staticData.animators[index].maxLevel && !game.staticData.animators[index].maxLevel == 0
+        },
+
+        wouldAnimatorBeMaxed: function (index) {
+            return (!game.staticData.animators[index].maxLevel == 0) && (!game.getValue.isAnimatorMaxed(index) || (game.userData.animators[index].level + levelBuyAmount >= game.staticData.animators[index].maxLevel))
         },
 
         animatorEffect: function (index, next = false) {
@@ -208,7 +229,7 @@ let game = {
         },
 
         animatorBonuses: {
-            enemiesPerZone: function() {
+            enemiesPerZone: function () {
                 if (game.userData.stats.zone % 10 == 0) return 1;
 
                 let base = 10;
@@ -217,7 +238,7 @@ let game = {
                 return base - subtract;
             },
 
-            bossTimer: function() {
+            bossTimer: function () {
                 let base = 20000;
                 let add = game.getValue.animatorEffect(6).toNumber();
                 add = 1 + (add / 100)
@@ -225,7 +246,7 @@ let game = {
                 return base * add;
             },
 
-            coinsGainedOnPrestige: function() {
+            coinsGainedOnPrestige: function () {
                 return game.getValue.animatorEffect(1);
             }
         },
@@ -320,7 +341,7 @@ let enemies = {
         events.changeLevel('PREVIOUS');
     },
 
-    getEnemyObject: function() {
+    getEnemyObject: function () {
         if (game.userData.stats.zone % 10 == 0) {
             return game.staticData.zones[enemies.enemyInfo.zoneType].boss;
         } else {
@@ -328,13 +349,13 @@ let enemies = {
         }
     },
 
-    getSoulCoinReward: function() {
+    getSoulCoinReward: function () {
         let returnValue = BigNumber('1')
-        returnValue = returnValue.plus(BigNumber(game.userData.stats.zone / 10).exponentiatedBy(2).dividedBy(10));
-        return returnValue.multipliedBy(game.getValue.multipliedByIncrease(game.getValue.animatorEffect(5))).integerValue(4)
+        returnValue = returnValue.plus(BigNumber(game.userData.stats.zone / 10).exponentiatedBy(2).dividedBy(50));
+        return returnValue.multipliedBy(game.getValue.multipliedByIncrease(game.getValue.animatorEffect(5))).integerValue(4);
     },
 
-    givesSoulCoins: function() {
+    givesSoulCoins: function () {
         return game.userData.stats.highestZoneUnlocked % 10 == 0 && game.userData.stats.zone == game.userData.stats.highestZoneUnlocked;
     },
 
@@ -374,7 +395,7 @@ let enemies = {
     calculateCoinReward: function (level) {
         var levelMinusOne = (level - 1)
         var reward = BigNumber('1');
-        var exponent = BigNumber('1.415').exponentiatedBy(levelMinusOne);
+        var exponent = BigNumber('1.405').exponentiatedBy(levelMinusOne);
 
         reward = reward.multipliedBy(levelMinusOne);
         reward = reward.multipliedBy(exponent);
@@ -393,7 +414,7 @@ let events = {
     },
 
     // GAIN FUNCTIONS
-    addCoins: function(number) {
+    addCoins: function (number) {
         let amount = BigNumber(number);
         let multiplier = game.getValue.multipliedByIncrease(game.getValue.animatorEffect(2))
         amount = amount.multipliedBy(multiplier);
@@ -401,14 +422,14 @@ let events = {
         game.userData.stats.totalCoins = game.userData.stats.totalCoins.plus(amount);
     },
 
-    addSoulCoins: function(number) {
+    addSoulCoins: function (number) {
         let amount = BigNumber(number);
         game.userData.stats.soulCoins = game.userData.stats.soulCoins.plus(amount);
         game.userData.stats.totalSoulCoins = game.userData.stats.totalSoulCoins.plus(amount);
         display.update.damage();
     },
 
-    changeLevel: function(level) {
+    changeLevel: function (level) {
         if (level == 'NEXT' && enemies.dying) {
             // do nothing
         }
@@ -430,7 +451,7 @@ let events = {
     },
 
     prestige: {
-        confirm: function() {
+        confirm: function () {
             if (game.userData.stats.highestZoneUnlocked > 10) {
                 display.popup.display("Are you sure you want to prestige? Your game will restart but you will recieve " + utility.number.format(game.userData.stats.pendingSoulCoins) + " soul coins to spend on powerful bonuses. Click OK to confirm.", "OK", "events.prestige.reset()");
             } else {
@@ -438,7 +459,7 @@ let events = {
             }
         },
 
-        reset: function() {
+        reset: function () {
             // RESET CURRENCY
             game.userData.stats.coins = BigNumber('0');
             // RESET ZONE
@@ -467,11 +488,11 @@ let events = {
 
     animators: {
         purchase: function (index) {
-            cost = game.getValue.animatorLevelUpCost(index)
-            if (!game.getValue.isAnimatorMaxed(index) && game.userData.stats.soulCoins.isGreaterThanOrEqualTo(cost)) {
+            cost = game.getValue.animatorLevelUpCost(index, levelBuyAmount)
+            if (!game.getValue.wouldAnimatorBeMaxed(index) && game.userData.stats.soulCoins.isGreaterThanOrEqualTo(cost)) {
                 game.userData.stats.soulCoins = game.userData.stats.soulCoins.minus(cost);
                 game.userData.stats.soulCoinsSpent = game.userData.stats.soulCoinsSpent.plus(cost);
-                game.userData.animators[index].level++;
+                game.userData.animators[index].level += levelBuyAmount;
 
                 display.update.upgrades.animators.single(index);
                 display.update.damage();
@@ -481,14 +502,11 @@ let events = {
 
     characters: {
         purchase: function (index) {
-            cost = game.getValue.characterLevelUpCost(index, amountOfLevels = 1)
+            cost = game.getValue.characterLevelUpCost(index, levelBuyAmount)
             if (game.userData.stats.coins.isGreaterThanOrEqualTo(cost)) {
                 game.userData.stats.coins = game.userData.stats.coins.minus(cost);
-                game.userData.characters[index].level++;
-
-                if (index != 0 && game.userData.characters[index].level >= 200 && (game.userData.characters[index].level % 25) == 0) {
-                    game.userData.characters[index].levelMultiplier = game.getValue.characterBonus(index)
-                }
+                game.userData.characters[index].level += levelBuyAmount;
+                if (game.userData.characters[index].level >= 200) game.userData.characters[index].levelMultiplier = game.getValue.characterBonus(index)
 
                 display.update.upgrades.characters.single(index);
                 display.update.damage();
@@ -537,7 +555,7 @@ let display = {
         visible: false,
 
         show: function () {
-            if(game.userData.settings["hideAllTooltips"] == false) this.visible = true;
+            if (game.userData.settings["hideAllTooltips"] == false) this.visible = true;
         },
 
         hide: function () {
@@ -557,7 +575,8 @@ let display = {
                 text += "<p>" + game.staticData.characters[index].description + "</p>";
                 text += "<p>DPS: " + utility.number.format(game.getValue.characterDPS(index, "THIS")); + "</p>";
                 text += "<p>Next Level: " + utility.number.format(game.getValue.characterDPS(index, "NEXT")); + "</p>";
-                if (index != 0 && game.userData.characters[index].level >= 175) { text += "<p><b>+" + game.getValue.characterNextBonus(index) +"% DPS<b> at level " + (Math.floor((game.userData.characters[index].level) / 25) * 25 + 25) };
+                if (index != 0 && game.userData.characters[index].level >= 175) { text += "<p><b>+" + game.getValue.characterNextBonus(index) + "% DPS<b> at level " + (Math.floor((game.userData.characters[index].level) / 25) * 25 + 25) };
+                text += "<p style=\"font-size:75%;\">Press SHIFT for 10x, Z for 25x, CTRL for 100x, and Q for 9999x</p>"
                 return text;
             },
 
@@ -653,14 +672,14 @@ let display = {
             } else {
                 document.getElementById("nextZone").disabled = false;
             }
-            
+
             // ENEMY AND HEALTH
             if (enemies.givesSoulCoins()) {
                 document.getElementById("enemyInfo").innerHTML = enemies.getEnemyObject().name + " - <b>" + utility.number.format(enemies.getSoulCoinReward()) + " soul coins</b>";
             } else {
                 document.getElementById("enemyInfo").innerHTML = enemies.getEnemyObject().name + ", Lvl " + game.userData.stats.zone;
             }
-            
+
             if (enemies.dying) {
                 document.getElementById("healthAmount").innerHTML = "Defeated!";
             } else {
@@ -680,7 +699,7 @@ let display = {
             }
         },
 
-        damage: function() {
+        damage: function () {
             game.userData.stats.dps = game.getValue.damage.perSecond();
             game.userData.stats.dpc = game.getValue.damage.perClick();
 
@@ -738,13 +757,38 @@ let display = {
                     if (game.getValue.isAnimatorMaxed(index)) {
                         document.getElementById(divButton).innerHTML = "<br>MAX<br>";
                     } else {
-                        document.getElementById(divButton).innerHTML = "<br>LVL UP<br><scoin></scoin>" + utility.number.format(game.getValue.animatorLevelUpCost(index));
+                        document.getElementById(divButton).innerHTML = "<br>LVL UP<br><scoin></scoin>" + utility.number.format(game.getValue.animatorLevelUpCost(index, levelBuyAmount));
                     }
                 },
 
                 all: function () {
                     for (i = 0; i < game.staticData.animators.length; i++) {
                         display.update.upgrades.animators.single(i);
+                    }
+                },
+
+                updateCosts: function () {
+                    // ANIMATORS
+                    for (i = 0; i < game.staticData.animators.length; i++) {
+                        var prefix = "anim_" + i;
+                        var divButton = prefix + "_button";
+
+                        if (game.getValue.isAnimatorMaxed(i)) {
+                            document.getElementById(divButton).innerHTML = "<br>MAX<br>";
+                        } else {
+                            let levelUpText = "LVL UP";
+                            if (levelBuyAmount > 1) levelUpText = "x" + levelBuyAmount;
+                            document.getElementById(divButton).innerHTML = "<br>" + levelUpText + "<br><scoin></scoin>" + utility.number.format(game.getValue.animatorLevelUpCost(i, levelBuyAmount));
+                        }
+                    }
+
+                    for (i = 0; i < game.staticData.characters.length; i++) {
+                        var prefix = "char_" + i;
+                        var charButton = prefix + "_button";
+
+                        let levelUpText = "LVL UP";
+                        if (levelBuyAmount > 1) levelUpText = "x" + levelBuyAmount;
+                        document.getElementById(charButton).innerHTML = "<br>" + levelUpText + "<br><coin></coin>" + utility.number.format(game.getValue.characterLevelUpCost(i, levelBuyAmount));
                     }
                 }
             },
@@ -805,7 +849,7 @@ let display = {
                     var divButton = prefix + "_button";
 
                     var level = game.userData.characters[index].level
-                    var baseCost = game.getValue.characterLevelUpCost(index);
+                    var baseCost = game.getValue.characterLevelUpCost(index, levelBuyAmount);
 
                     document.getElementById(divName).innerHTML = game.staticData.characters[index].name;
                     document.getElementById(divLevel).innerHTML = "Lvl " + level;
@@ -886,10 +930,10 @@ let utility = {
                 return number.integerValue(1).toNumber().toString();
             } else {
                 let symbols = ["", "K", "M", "B", "T", "q", "Q", "s", "S", "O", "N", "d", "U", "D", "!", "@", "#", "$", "%", "^", "&", "*"]
-                for (sym = 0; number.isGreaterThanOrEqualTo('1000'); sym++) {
-                    number = number.dividedBy('1000');
-                }
-                var outputValue = (number.toNumber() - 0.004).toFixed(2);
+                let sym = Math.floor(number.e / 3);
+                let tenPower = BigNumber(10).exponentiatedBy(Math.floor(number.e / 3)*3)
+
+                var outputValue = (number.dividedBy(tenPower).toNumber() - 0.0044).toFixed(2);
                 var returnString = outputValue + "" + symbols[sym]
 
                 return returnString;
@@ -929,27 +973,38 @@ let utility = {
 let save = {
     save: {},
 
-    saveGame: function () {
-        this.save = game.userData
+    getSave: function () {
+        this.save = game.userData;
         this.save.version = SAVE_VERSION;
         this.save.timestamp = Date.now();
 
         // IS BETA?
         this.save.isBeta = BETA_STATUS;
-        let encodedSave = Base64.encode(JSON.stringify(save.save))
+        return Base64.encode(JSON.stringify(save.save))
+    },
 
+    manualSaveGame: function (es) {
         let element = document.createElement('a');
         element.style.display = 'none';
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(encodedSave));
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(es));
         element.setAttribute('download', "tccs.txt");
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
     },
 
+    autoSaveGame: function(es) {
+        window.localStorage.setItem('tccSave', es);
+    },
+
+    wipeAutoSave: function() {
+        window.localStorage.removeItem('tccSave');
+        location.reload();
+    },
+
     loadGame: function () {
         if (save.save.isBeta != BETA_STATUS) {
-            display.popup.display("The save could not be imported", "OK", "CLOSE");
+            display.popup.display("This save is a beta save and cannot be imported into the live version! Please import a save file from a different, non beta build. Thank you!", "OK", "CLOSE");
         } else {
             let sd = save.save
 
@@ -970,7 +1025,9 @@ let save = {
 
             // settings
             for (i = 0; i < SETTINGS.length; i++) {
-                document.getElementById(SETTINGS[i]).checked = sd.settings[SETTINGS[i]]
+                if (typeof sd.settings[SETTINGS[i]] != 'undefined') {
+                    document.getElementById(SETTINGS[i]).checked = sd.settings[SETTINGS[i]]
+                }
             }
 
 
@@ -1010,6 +1067,51 @@ document.addEventListener('mousemove', function (e) {
     }
 });
 
+// KEYBINDS
+let keybindManager = function (e) {
+    // REMOVE LATER
+}
+
+document.addEventListener('keydown', function (e) {
+    keybindManager(e);
+    if (e.code == 'ShiftLeft' || e.code == 'ShiftRight') {
+        levelBuyAmount = 10;
+        display.update.upgrades.animators.updateCosts();
+    } else if (e.code == 'KeyZ') {
+        levelBuyAmount = 25;
+        display.update.upgrades.animators.updateCosts();
+    } else if (e.code == 'ControlLeft' || e.code == 'ControlRight') {
+        levelBuyAmount = 100;
+        display.update.upgrades.animators.updateCosts();
+    } else if (e.code == 'KeyQ') {
+        levelBuyAmount = 9999;
+        display.update.upgrades.animators.updateCosts();
+    } else {
+        levelBuyAmount = 1;
+        display.update.upgrades.animators.updateCosts();
+    }
+});
+
+document.addEventListener('keyup', function (e) {
+    keybindManager(e);
+    if ((e.code == 'ShiftLeft' || e.code == 'ShiftRight') && levelBuyAmount == 10) {
+        levelBuyAmount = 1;
+        display.update.upgrades.animators.updateCosts();
+    } else if ((e.code == 'KeyZ') && levelBuyAmount == 25) {
+        levelBuyAmount = 1;
+        display.update.upgrades.animators.updateCosts();
+    } else if ((e.code == 'ControlLeft' || e.code == 'ControlRight') && levelBuyAmount == 100) {
+        levelBuyAmount = 1;
+        display.update.upgrades.animators.updateCosts();
+    } else if ((e.code == 'KeyQ') && levelBuyAmount == 9999) {
+        levelBuyAmount = 1;
+        display.update.upgrades.animators.updateCosts();
+    } else {
+        // if you're reading this then you eat grahm crackers
+    }
+});
+
+
 const input = document.querySelector('input[type="file"]')
 input.addEventListener('change', function (e) {
     const reader = new FileReader();
@@ -1022,10 +1124,24 @@ input.addEventListener('change', function (e) {
 });
 
 //setup
-
-enemies.spawnNewEnemy();
 display.update.upgrades.animators.load();
 display.update.upgrades.characters.load();
+
+//////////////////////////
+/// LOCAL STORAGE LOAD ///
+//////////////////////////
+if (window.localStorage.getItem('tccSave') != null) {
+    let readText = window.localStorage.getItem('tccSave');
+    save.save = JSON.parse(Base64.decode(readText));
+    save.loadGame()
+
+    console.log("Successfully loaded save from HTML5 local storage!")
+}
+//////////////////////////
+// END OF LOCAL STORAGE //
+//////////////////////////
+
+enemies.spawnNewEnemy();
 display.update.all();
 display.update.upgrades.characters.setVisibility();
 
@@ -1038,3 +1154,10 @@ setInterval(function () {
 setInterval(function () {
     display.update.upgrades.characters.setVisibility();
 }, 350)
+
+// autosave
+setInterval(function () {
+    if (game.userData.settings.autoSaveGame) {
+        save.autoSaveGame(save.getSave());
+    }
+}, 15000)
