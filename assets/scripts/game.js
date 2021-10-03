@@ -1,13 +1,10 @@
 /*
 version 0.02
-
 Hello and welcome to the cursed wasteland of game.js
 Most of this is probably really unorganized.
-
 CREDITS:
 https://github.com/MikeMcl/bignumber.js - BigNumber.js library
 http://www.webtoolkit.info/ - Base64 encoding and decoding
-
 Broman - Efficient Roman Numeral System
 Purpmogus - Pretty much everything else
 */
@@ -190,7 +187,16 @@ let game = {
         },
 
         wouldAnimatorBeMaxed: function (index) {
-            return (!game.staticData.animators[index].maxLevel == 0) && (!game.getValue.isAnimatorMaxed(index) || (game.userData.animators[index].level + levelBuyAmount >= game.staticData.animators[index].maxLevel))
+            let level = game.userData.animators[index].level;
+            let maxLevel = game.staticData.animators[index].maxLevel;
+            if (maxLevel == 0) {
+                return false;
+            } else if (game.getValue.isAnimatorMaxed(index)) {
+                return true;
+            } else if (level + levelBuyAmount > maxLevel) {
+                return true;
+            }
+            return false;
         },
 
         animatorEffect: function (index, next = false) {
@@ -931,7 +937,7 @@ let utility = {
             } else {
                 let symbols = ["", "K", "M", "B", "T", "q", "Q", "s", "S", "O", "N", "d", "U", "D", "!", "@", "#", "$", "%", "^", "&", "*"]
                 let sym = Math.floor(number.e / 3);
-                let tenPower = BigNumber(10).exponentiatedBy(Math.floor(number.e / 3)*3)
+                let tenPower = BigNumber(10).exponentiatedBy(Math.floor(number.e / 3) * 3)
 
                 var outputValue = (number.dividedBy(tenPower).toNumber() - 0.0044).toFixed(2);
                 var returnString = outputValue + "" + symbols[sym]
@@ -993,11 +999,11 @@ let save = {
         document.body.removeChild(element);
     },
 
-    autoSaveGame: function(es) {
+    autoSaveGame: function (es) {
         window.localStorage.setItem('tccSave', es);
     },
 
-    wipeAutoSave: function() {
+    wipeAutoSave: function () {
         window.localStorage.removeItem('tccSave');
         location.reload();
     },
